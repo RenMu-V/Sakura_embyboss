@@ -39,6 +39,10 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 # 复制本地项目代码
 COPY . .
 
+# 修补 pyrogram 的会话重建/peer 解析缺陷(只改 site-packages, 不动 bot 源码;
+# 详见 tools/patch_pyrogram.py 与 HERMES-FORK.md)
+RUN python3 tools/patch_pyrogram.py
+
 # 保持镜像体积精简，仅保留 bot 默认图片
 RUN find ./image -type f ! -name "bot2.png" -delete
 # 设置启动命令
