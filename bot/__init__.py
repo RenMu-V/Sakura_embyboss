@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 # -*- coding: utf-8 -*-
 import contextlib
+import os
 
 from .func_helper.logger_config import logu, Now
 
@@ -150,6 +151,9 @@ from pyromod import Client
 proxy = {} if not config.proxy.scheme else config.proxy.dict()
 
 bot = Client(bot_name, api_id=owner_api, api_hash=owner_hash, bot_token=bot_token, proxy=proxy,
+             # session(auth key + peer 缓存)的落盘目录, 用环境变量配置以便挂持久化卷;
+             # 否则容器 recreate 就丢, 每次都要重新登录, 且新 session 解析不了群/频道
+             workdir=os.environ.get("BOT_SESSION_DIR", "."),
              workers=300,
              max_concurrent_transmissions=1000, parse_mode=enums.ParseMode.MARKDOWN)
 

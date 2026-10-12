@@ -102,6 +102,16 @@ async def warmup_peer_cache():
     """
     for gid in group:
         try:
+            # 调用点是 loop.call_later(8, ...): 冷启动(尤其要重新登录时)8 秒可能还没连上,
+            # 原来会直接报 "Client has not been started yet" 就放弃, 于是启动后一段时间内
+            # 所有发群操作都不可用。这里先等 client 连上再解析。
+            for _ in range(30):
+                if bot.is_connected:
+                    break
+                await asyncio.sleep(2)
+            else:
+                LOGGER.warning("peer 预热放弃: client 60 秒内未连上")
+                return
             await bot.get_chat(gid)
             LOGGER.info(f"peer 预热成功: {gid}")
         except PeerIdInvalid:
