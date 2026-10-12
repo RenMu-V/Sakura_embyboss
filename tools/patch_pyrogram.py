@@ -40,12 +40,12 @@ import sys
 
 import pyrogram
 
-# 顺着已安装的 pyrogram 定位 site-packages, 不写死路径
-SITE = os.path.dirname(os.path.dirname(os.path.abspath(pyrogram.__file__)))
-SESSION = os.path.join(SITE, "session", "session.py")
-RESOLVE = os.path.join(SITE, "methods", "advanced", "resolve_peer.py")
-UTILS = os.path.join(SITE, "utils.py")
-CLIENT = os.path.join(SITE, "client.py")
+# 顺着已安装的 pyrogram 定位包目录, 不写死路径
+PYRO = os.path.dirname(os.path.abspath(pyrogram.__file__))
+SESSION = os.path.join(PYRO, "session", "session.py")
+RESOLVE = os.path.join(PYRO, "methods", "advanced", "resolve_peer.py")
+UTILS = os.path.join(PYRO, "utils.py")
+CLIENT = os.path.join(PYRO, "client.py")
 
 
 def patch(path, old, new, tag):
@@ -75,6 +75,10 @@ def append_once(path, code, marker, tag):
 
 
 def main():
+    print("pyrogram: %s @ %s" % (pyrogram.__version__, PYRO))
+    for p in (SESSION, RESOLVE, UTILS, CLIENT):
+        if not os.path.isfile(p):
+            raise SystemExit("!! 找不到目标文件: %s" % p)
     print("== A. session/session.py ==")
 
     patch(
