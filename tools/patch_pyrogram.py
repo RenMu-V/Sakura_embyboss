@@ -299,7 +299,14 @@ _session_dir_patch()
     assert "fetch_peers(" in io.open(RESOLVE, encoding="utf-8").read()
     assert "_session_dir_patch" in io.open(CLIENT, encoding="utf-8").read()
 
-    from pyrogram import utils
+    # 行为断言。注意: 顶层 `import pyrogram` 已经把这个模块缓存进 sys.modules 了,
+    # 补丁改的是磁盘文件, 必须丢掉缓存重新加载才能验到真实行为。
+    import importlib
+    for _m in [k for k in list(sys.modules)
+               if k == "pyrogram.utils" or k.startswith("pyrogram.utils.")]:
+        del sys.modules[_m]
+    importlib.invalidate_caches()
+    utils = importlib.import_module("pyrogram.utils")
     cases = [(-1002257538689, "channel"), (-1000000000001, "channel"),
              (-1002147483648, "channel"), (-1000000000, "chat"), (7528636189, "user")]
     for pid, want in cases:
